@@ -1,0 +1,168 @@
+:root{
+  --ink:#101820;
+  --sub:#4d4d4d;
+  --accent:#0f6cbd;
+  --line:#c9ccd1;
+  --bg:#ffffff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Calibri','Segoe UI',Arial,sans-serif;
+  color:var(--ink);
+  background:#e9ebee;
+}
+.page{
+  max-width:850px;
+  margin:26px auto;
+  background:var(--bg);
+  padding:42px 56px;
+  box-shadow:0 0 16px rgba(0,0,0,0.10);
+}
+
+/* Header */
+header{
+  margin-bottom:18px;
+}
+header h1{
+  font-size:28px;
+  margin:0 0 4px 0;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:0.3px;
+}
+header .role{
+  font-size:13.5px;
+  color:var(--sub);
+  margin-bottom:8px;
+}
+header .contact{
+  font-size:12px;
+  color:var(--sub);
+  display:flex;
+  flex-wrap:wrap;
+  row-gap:3px;
+}
+header .contact span{
+  margin-right:14px;
+  white-space:nowrap;
+}
+header .contact a{
+  color:var(--sub);
+  text-decoration:none;
+}
+header .contact a:hover{
+  text-decoration:underline;
+}
+.rule{
+  height:2px;
+  background:var(--ink);
+  margin-top:14px;
+  border:none;
+}
+
+/* Section */
+section{
+  margin-bottom:15px;
+}
+h2{
+  font-size:12.5px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  font-weight:700;
+  margin:0 0 8px 0;
+  padding-bottom:3px;
+  border-bottom:1px solid var(--line);
+}
+p{
+  font-size:13px;
+  line-height:1.5;
+  margin:3px 0;
+  color:#2b2b2b;
+}
+
+/* Skills — systematic table-style rows, ATS-friendly plain text */
+.skill-row{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  gap:0 14px;
+  margin-bottom:5px;
+  align-items:baseline;
+}
+.skill-row .label{
+  font-weight:700;
+  font-size:12.5px;
+  color:var(--ink);
+}
+.skill-row .values{
+  font-size:12.5px;
+  color:var(--sub);
+}
+
+.entry{
+  margin-bottom:10px;
+}
+.entry-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  flex-wrap:wrap;
+}
+.entry-title{
+  font-weight:700;
+  font-size:14px;
+  color:var(--ink);
+}
+.entry-link{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:400;
+}
+.entry-tag{
+  font-size:12px;
+  color:var(--sub);
+}
+.entry-meta{
+  font-size:12px;
+  color:var(--sub);
+  font-style:italic;
+  margin-bottom:3px;
+}
+
+ul{
+  margin:3px 0 0 0;
+  padding-left:18px;
+}
+ul li{
+  font-size:12.5px;
+  line-height:1.42;
+  color:#2b2b2b;
+  margin-bottom:2px;
+}
+ul li::marker{
+  color:var(--accent);
+}
+
+.edu-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 40px;
+}
+.edu-item{
+  margin-bottom:6px;
+}
+.edu-item .school{
+  font-weight:700;
+  font-size:13px;
+  color:var(--ink);
+}
+.edu-item .detail{
+  font-size:12px;
+  color:var(--sub);
+}
+
+@media print{
+  body{background:#fff;}
+  .page{box-shadow:none;margin:0;max-width:100%;}
+}
