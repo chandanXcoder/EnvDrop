@@ -36,6 +36,8 @@ In scope:
 - XSS or CSP bypasses in the web page or the review webview.
 - Ways the extension could leak secret values (logs, notifications, telemetry, temp files).
 - Rate-limit bypasses with real impact.
+- The CLI (`cli/`): leaking values to the terminal, the shell history or its local state file.
+- The self-hosted Node/Docker server: for example, rate-limit spoofing or memory exhaustion.
 
 Out of scope (documented limitations, see the README threat model):
 

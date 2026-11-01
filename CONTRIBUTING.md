@@ -24,8 +24,12 @@ npm test
 
 - `shared/`: anything used by more than one of extension, server, web page and (future) CLI. Pure TypeScript, runs in Node, Workers and browsers. **No Node-only APIs.**
 - `server/`: the HTTP handler (`app.ts`) is runtime-agnostic. Cloudflare-specific code lives in `index.ts` and `secretObject.ts` only.
-- `extension/src/core/`: logic that doesn't import `vscode`, so it can be unit-tested.
-- `extension/src/vscode/`: UI glue only.
+- `core/`: Node-side logic shared by the extension and the CLI (no `vscode` imports), so it can be unit-tested.
+- `extension/src/vscode/`: VS Code glue. Webview UI lives in `extension/media/`: `base.css` is the design system and `ui.js` holds the helpers.
+- `cli/`: the `envdrop` CLI. Keep it dependency-free at runtime, because esbuild bundles it.
+- `server/src/node.ts`: the self-host adapter. Keep behaviour identical to the Worker by going through `app.ts`.
+
+UI work: keep animations subtle, respect `prefers-reduced-motion`, and use theme variables in webviews. To check a change visually, render the webview with mock data in headless Chrome. Every screenshot in `docs/screenshots` was made this way.
 
 ## Rules for security-sensitive code
 

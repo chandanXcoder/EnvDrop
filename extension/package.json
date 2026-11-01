@@ -2,7 +2,7 @@
   "name": "envdrop-vscode",
   "displayName": "EnvDrop",
   "description": "Share .env files end-to-end encrypted with expiring, burn-after-read links. Warns before you leak secrets to git.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "your-publisher",
   "license": "MIT",
   "private": true,

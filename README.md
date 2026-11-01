@@ -1,4 +1,13 @@
-# EnvDrop
+<p align="center"><img src="docs/brand/logo.svg" width="96" alt="EnvDrop logo"></p>
+
+<h1 align="center">EnvDrop</h1>
+
+<p align="center">
+  <a href="https://github.com/chandanXcoder/EnvDrop/actions"><img alt="CI" src="https://github.com/chandanXcoder/EnvDrop/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/chandanXcoder/EnvDrop"><img alt="GitHub stars" src="https://img.shields.io/github/stars/chandanXcoder/EnvDrop?style=flat&logo=github"></a>
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8b6cff">
+  <img alt="E2E encrypted" src="https://img.shields.io/badge/AES--256--GCM-end--to--end-22d3ee">
+</p>
 
 **Share `.env` files from VS Code, end-to-end encrypted, with expiring, burn-after-read links.** No more pasting secrets into WhatsApp, Slack or email.
 
@@ -16,7 +25,13 @@ EnvDrop also adds guardrails that stop accidental leaks:
 ![Staged secret warning](docs/gifs/precommit.gif)
 -->
 
-> 🎬 _Demo GIFs coming soon: share in one click · pull with a masked diff · staged-secret warning._
+|                                                   VS Code sidebar                                                    |                                          Pull: masked review                                           |                                               Share: sealed                                               |
+| :------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: |
+| <img src="docs/screenshots/sidebar.png" width="230" alt="EnvDrop sidebar with env files, git status and live links"> | <img src="docs/screenshots/pull-review.png" width="420" alt="Masked key-by-key review before writing"> | <img src="docs/screenshots/share-success.png" width="420" alt="Share success with countdown ring and QR"> |
+
+|                                  Browser fallback                                   |                                   Burned link                                   |                            `.env.example` key check                             |
+| :---------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
+| <img src="docs/screenshots/web-decrypt.png" width="300" alt="Browser decrypt page"> | <img src="docs/screenshots/web-burned.png" width="300" alt="Burned link state"> | <img src="docs/screenshots/key-check.png" width="300" alt="Missing keys check"> |
 
 ---
 
@@ -43,16 +58,24 @@ EnvDrop also adds guardrails that stop accidental leaks:
    - The server can't brute-force the passphrase offline, because it never has the link key.
 5. The sender can **revoke** a link at any time. The revoke token stays in VS Code SecretStorage (your OS keychain), and the server stores only its SHA-256 hash.
 
-## Features (Phase 1)
+## Features
 
-|                           |                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **EnvDrop: Share .env**   | Command Palette, right-click a `.env*` file, or the `$(lock) EnvDrop` status bar item. Pick file → expiry → max views → optional passphrase. The link is copied to your clipboard and a notice says so.                                                                                                                                                                |
-| **EnvDrop: Pull .env**    | Paste the link (it's pre-filled if it's already on your clipboard). You get a warning if the link points at a server other than yours. Then the file is decrypted and a masked review opens.                                                                                                                                                                           |
-| **Masked review**         | Shows added / changed / only-in-local / unchanged keys. Values are always `••••••••`. **Reveal** shows one value for 10 s. Apply the selected keys (merge) or replace the whole file. The old file is backed up as `.env.backup`, which is gitignored automatically.                                                                                                   |
-| **.gitignore check**      | Runs on share and once on workspace open (dismissible). It uses `git check-ignore` and also detects env files that are already **tracked**. Without git, it falls back to a pure-JS parser of nested `.gitignore` files. One click adds the file to `.gitignore`.                                                                                                      |
-| **Staged-secret warning** | Uses the built-in Git extension. It flags staged `.env*` (not `.env.example`/`.sample`/`.template`), `*.pem`/`*.key`, `id_rsa`, `credentials.json`… and scans staged diffs for AWS, GitHub, Stripe, Slack, Google, OpenAI and Anthropic keys, private-key headers, and high-entropy `SECRET=...` assignments. It shows only the file, line, type and a masked preview. |
-| **EnvDrop: Revoke link**  | Lists links created on this machine. Revoke one or all.                                                                                                                                                                                                                                                                                                                |
+### VS Code extension
+
+|                                       |                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **EnvDrop: Share .env**               | Command Palette, right-click a `.env*` file, or the `$(lock) EnvDrop` status bar item. Pick file → expiry → max views → optional passphrase. The link is copied to your clipboard and a notice says so.                                                                                                                                                                |
+| **EnvDrop: Pull .env**                | Paste the link (it's pre-filled if it's already on your clipboard). You get a warning if the link points at a server other than yours. Then the file is decrypted and a masked review opens.                                                                                                                                                                           |
+| **Masked review**                     | Shows added / changed / only-in-local / unchanged keys. Values are always `••••••••`. **Reveal** shows one value for 10 s. Apply the selected keys (merge) or replace the whole file. The old file is backed up as `.env.backup`, which is gitignored automatically.                                                                                                   |
+| **.gitignore check**                  | Runs on share and once on workspace open (dismissible). It uses `git check-ignore` and also detects env files that are already **tracked**. Without git, it falls back to a pure-JS parser of nested `.gitignore` files. One click adds the file to `.gitignore`.                                                                                                      |
+| **Staged-secret warning**             | Uses the built-in Git extension. It flags staged `.env*` (not `.env.example`/`.sample`/`.template`), `*.pem`/`*.key`, `id_rsa`, `credentials.json`… and scans staged diffs for AWS, GitHub, Stripe, Slack, Google, OpenAI and Anthropic keys, private-key headers, and high-entropy `SECRET=...` assignments. It shows only the file, line, type and a masked preview. |
+| **EnvDrop: Revoke link**              | Lists links created on this machine. Revoke one or all.                                                                                                                                                                                                                                                                                                                |
+| **Sidebar (activity bar)**            | Animated home with Share / Pull, every env file in the workspace with its environment (dev / staging / prod) and **git status** (gitignored / not ignored / tracked), one-click **Protect**, live link countdowns with Revoke, guardrail toggles, GitHub links.                                                                                                        |
+| **Share panel**                       | Sealing animation, countdown ring, masked link, copy / clear clipboard / revoke, and an on-demand **QR code** for handing a link to a phone.                                                                                                                                                                                                                           |
+| **Explorer badges + status bar**      | 🔒 on gitignored env files, `!` when they could be committed, `!!` when tracked. The status bar turns into a warning with a count.                                                                                                                                                                                                                                     |
+| **Generate .env.example** _(Phase 2)_ | Strips every value, keeps comments, order and placeholders you already wrote. Warns if a `.env*` rule hides the example from git and offers `!.env.example`.                                                                                                                                                                                                           |
+| **Check missing keys** _(Phase 2)_    | Compares `.env` with `.env.example`: missing, empty and undocumented keys, with a coverage score. One click adds the missing ones (empty) or documents the extra ones.                                                                                                                                                                                                 |
+| **Multiple environments** _(Phase 2)_ | `.env`, `.env.local`, `.env.development`, `.env.staging`, `.env.production`… are picked with environment labels and git status, and sharing production asks for confirmation.                                                                                                                                                                                          |
 
 ### Settings
 
@@ -68,14 +91,35 @@ EnvDrop also adds guardrails that stop accidental leaks:
 
 To silence one line, put `envdrop:allow` in a comment on that line.
 
+### CLI (`npx envdrop`) _(Phase 3)_
+
+```bash
+npx envdrop share .env --expiry 1h --views 1 --qr   # gitignore guard → encrypt → boxed link + terminal QR
+npx envdrop pull                                    # paste the link when asked (kept out of shell history)
+npx envdrop revoke            # list your links · envdrop revoke <id> · envdrop revoke --all
+npx envdrop scan --staged     # exit 1 if staged changes contain .env files or secrets
+npx envdrop hook install      # real git pre-commit hook (doesn't clobber existing hooks)
+npx envdrop example           # write .env.example (values stripped)
+npx envdrop check             # missing keys vs .env.example (exit 1 if any are missing)
+```
+
+- **Server:** set `--server <url>` or `ENVDROP_SERVER`.
+- **Passphrases:** `--passphrase` prompts with hidden input. `ENVDROP_PASSPHRASE` exists for CI only.
+- **Revoke tokens:** stored in `~/.config/envdrop/links.json` with mode 0600. The link keys themselves are never stored.
+- **Pull modes:** `--merge`, `--replace` or `--yes` make pull non-interactive.
+- **Output:** respects `NO_COLOR`.
+
 ---
 
 ## Repository layout
 
 ```
-shared/     crypto, envelope format, .env parser + diff/merge, secret patterns + scanner (no deps except @noble/hashes)
-server/     Cloudflare Worker: API, Durable Object store, rate limiting, /s/:id browser decrypt page
-extension/  VS Code extension: core/ (vscode-free, unit-tested) + vscode/ (commands, webview, git watcher)
+shared/     crypto, envelope format, .env parser + diff/merge/example, secret patterns + scanner (runs everywhere)
+core/       Node-side logic shared by extension and CLI: API client, share/pull, gitignore, env files, QR
+server/     fetch handler + Cloudflare Worker (Durable Objects) + self-host Node adapter; web pages in src/web
+extension/  VS Code extension: src/vscode (commands, sidebar, panels, git watcher) + media/ (webview UI)
+cli/        `envdrop` CLI, bundled into one dependency-free file
+docs/       brand assets and screenshots
 ```
 
 ## Development
@@ -120,6 +164,18 @@ This uses SQLite-backed Durable Objects (available on the Workers Free plan) and
 
 Logging: the server never logs request bodies, and `[observability]` is disabled in `wrangler.toml`. Cloudflare still processes request metadata (IP, URL path containing the id) as your infrastructure provider.
 
+### Self-host with Docker _(Phase 3)_
+
+```bash
+docker compose up -d          # → http://localhost:8787 (landing page at /, API at /api)
+```
+
+- **Same code as the Worker.** The image runs the same API and web pages, through a small Node adapter backed by an **in-memory store**. Secrets never touch disk, a restart wipes them, and you should run a single instance.
+- **Hardened compose file.** Read-only filesystem, `cap_drop: ALL`, `no-new-privileges`, a memory limit, non-root user, and a healthcheck.
+- **Put it behind a TLS reverse proxy** such as Caddy, Traefik or nginx. Then set `PUBLIC_URL=https://envdrop.example.com` and `TRUST_PROXY=true`, so rate limits use `X-Forwarded-For`. Clients can't spoof `X-Real-IP` or `CF-Connecting-IP`: the adapter strips them.
+- **Capacity.** `MAX_SECRETS` (default 10 000) caps memory use. When the store is full, the server returns `503`.
+- **Without Docker:** `npm run build:node -w server && PORT=8787 node server/dist/node/server.mjs`.
+
 ### API
 
 | Method   | Path               |                                                                                                                                                  |
@@ -128,6 +184,7 @@ Logging: the server never logs request bodies, and `[observability]` is disabled
 | `GET`    | `/api/secrets/:id` | Consumes one view → `200 { envelope, viewsLeft, expiresAt }`, or `404` (unknown, expired, burned and revoked all look identical)                 |
 | `DELETE` | `/api/secrets/:id` | `Authorization: Bearer <revokeToken>` → `204` / `404`                                                                                            |
 | `GET`    | `/s/:id`           | Static browser decrypt page. It fetches the blob only after you click **Decrypt**, so chat link previews can't burn the view.                    |
+| `GET`    | `/`                | Landing page                                                                                                                                     |
 
 Responses carry `Cache-Control: no-store`, HSTS, a strict CSP, `X-Frame-Options: DENY` and `Referrer-Policy: no-referrer`. There are no CORS headers, and `429` is returned when the per-IP rate limit is exceeded.
 
@@ -155,7 +212,10 @@ Responses carry `Cache-Control: no-store`, HSTS, a strict CSP, `X-Frame-Options:
 - **Metadata.** The server (and Cloudflare) see IP addresses, timing, view counts and an approximate size (padded to 1 KiB).
 - **What the recipient does next.** After decryption, the file is plaintext on their disk.
 - **A malicious `.env` from a sender you shouldn't trust.** Env files can change program behaviour (e.g. `NODE_OPTIONS`). Pull shows every key before writing and warns about unfamiliar servers.
-- **Commits made outside VS Code, or ignored warnings.** The staged-secret warning is a _warning_ inside VS Code, not a git hook, and its patterns are heuristics. Use a dedicated scanner (e.g. gitleaks) in CI as well.
+- **Commits made outside VS Code, or ignored warnings.** The extension's staged-secret check is a _warning_, not enforcement. `envdrop hook install` adds a real pre-commit hook, but anyone can bypass it with `git commit --no-verify`, and the patterns are heuristics. Use a dedicated scanner (e.g. gitleaks) in CI as well.
+- **Local CLI state.** The CLI keeps revoke tokens, never keys, in a 0600 file rather than the OS keychain. `ENVDROP_PASSPHRASE` is visible to other processes run by the same user, so use it only in CI.
+- **Self-hosted restarts and multiple replicas.** The Docker image's in-memory store loses every secret on restart, and replicas don't share state. Run a single instance.
+- **QR codes.** A QR code contains the full link, including the key. Anyone who can see your screen can scan it.
 - **Secrets already pushed.** If a secret was ever committed and pushed, rotate it. Removing the file doesn't remove it from history.
 
 ### Crypto summary
@@ -179,11 +239,11 @@ No custom cryptographic primitives are used.
 1. Create a publisher at <https://marketplace.visualstudio.com/manage> and a Personal Access Token in Azure DevOps with the **Marketplace → Manage** scope.
 2. In `extension/package.json`:
    - Set `publisher` (currently the placeholder `your-publisher`) and `repository.url`.
-   - Add a 128×128 `icon`.
+   - The 128×128 icon is already at `extension/media/icon.png`. Its source is `docs/brand/logo.svg`.
    - Change the default `envdrop.serverUrl` to your deployed server, and update `DEFAULT_SERVER_URL` in `extension/src/vscode/config.ts` to match.
 3. Package and test locally:
    ```bash
-   npm run package -w extension          # → extension/dist/envdrop.vsix
+   npm run package -w extension          # → extension/dist/envdrop.vsix (extension id: <publisher>.envdrop-vscode)
    code --install-extension extension/dist/envdrop.vsix
    ```
 4. Publish:
@@ -195,9 +255,24 @@ No custom cryptographic primitives are used.
    `--no-dependencies` is correct here: esbuild bundles everything into `dist/extension.js`, and `.vscodeignore` keeps only the bundle, the webview `media/`, the README, the LICENSE and the CHANGELOG.
 5. Optionally, also publish to Open VSX (`npx ovsx publish dist/envdrop.vsix -p <token>`) for VSCodium and Cursor users.
 
-## Roadmap
+## Publishing the CLI to npm
 
-- **Phase 2:** generate `.env.example`, check for missing keys against `.env.example`, a richer multi-environment picker.
-- **Phase 3:** a CLI (`npx envdrop share / pull`, which could also install a real git pre-commit hook), QR codes for links, self-hosting via Docker (Node + the existing `MemoryStore`/Redis).
+```bash
+npm run build -w cli
+cd cli && npm publish --access public     # publishes the single bundled file dist/envdrop.mjs
+```
+
+## Status
+
+- ✅ **Phase 1:** Share / Pull / Revoke, E2E crypto, gitignore check, masked diff, staged-secret warning, backend.
+- ✅ **Phase 2:** `.env.example` generation, missing-key check, multi-environment picker.
+- ✅ **Phase 3:** CLI with git hook and terminal QR, QR codes in VS Code, Docker self-hosting.
+- 💡 **Ideas:** a Redis store for multi-replica self-hosting, team key directories (encrypting to a teammate's public key), and Open VSX publishing in CI.
+
+## Credits
+
+- The **Git logo** is by [Jason Long](https://twitter.com/jasonlong), licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). It is used to mark git-related status.
+- **GitHub** and the GitHub mark are trademarks of GitHub, Inc. The mark (from [Octicons](https://github.com/primer/octicons), MIT) is used only to link to this project's repository. EnvDrop is not affiliated with or endorsed by GitHub.
+- The VS Code UI uses [Codicons](https://github.com/microsoft/vscode-codicons) (CC BY 4.0).
 
 See [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md). License: [MIT](LICENSE).

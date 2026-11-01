@@ -1,5 +1,7 @@
 # EnvDrop
 
+<img src="https://raw.githubusercontent.com/chandanXcoder/EnvDrop/main/docs/screenshots/sidebar.png" width="240" align="right" alt="EnvDrop sidebar">
+
 **Share `.env` files end-to-end encrypted, with expiring, burn-after-read links, right from VS Code.** Stop pasting secrets into Slack, WhatsApp or email.
 
 - **Share .env**: one click (Command Palette, right-click a `.env` file, or the `EnvDrop` status bar item). Choose an expiry (10 min / 1 h / 24 h), a view limit (default: burn after 1 view) and an optional passphrase. The link is copied to your clipboard.
@@ -7,6 +9,12 @@
 - **.gitignore guard**: you're warned before sharing a `.env` that isn't gitignored, or that is already **tracked**. One click fixes it.
 - **Staged-secret warning**: you're warned when `.env`, key files or likely secrets (AWS, GitHub, Stripe, Slack, Google, OpenAI and Anthropic keys, private keys, high-entropy `SECRET=...`) are staged. Only the file, line and a masked preview are shown.
 - **Revoke link**: kill any link you created on this machine before it's used.
+- **Sidebar**: every env file in the workspace with its environment and git status (Git logo chips), one-click **Protect**, live link countdowns, guardrail toggles.
+- **Explorer badges and status bar**: 🔒 gitignored, `!` could be committed, `!!` tracked.
+- **Generate .env.example** and **Check missing keys**: keep teammates in sync without sharing values.
+- **QR code** for a link, shown only when you ask.
+
+<p align="center"><img src="https://raw.githubusercontent.com/chandanXcoder/EnvDrop/main/docs/screenshots/pull-review.png" width="640" alt="Masked review before writing"></p>
 
 ## How the encryption works
 
