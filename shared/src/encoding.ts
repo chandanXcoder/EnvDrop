@@ -3,7 +3,7 @@
 export type Bytes = Uint8Array<ArrayBuffer>;
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder('utf-8', { fatal: true });
+const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: false });
 
 export function utf8Encode(s: string): Bytes {
   return encoder.encode(s) as Bytes;
@@ -45,7 +45,7 @@ export function fromBase64Url(s: string): Bytes {
 
 export function randomBytes(n: number): Bytes {
   const out = new Uint8Array(n);
-  globalThis.crypto.getRandomValues(out);
+  crypto.getRandomValues(out);
   return out;
 }
 

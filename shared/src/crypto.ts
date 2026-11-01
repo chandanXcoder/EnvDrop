@@ -33,7 +33,7 @@ import {
 } from './limits';
 import type { Envelope, ScryptParams, SharePayload } from './types';
 
-const subtle = () => globalThis.crypto.subtle;
+const subtle = () => crypto.subtle;
 const HKDF_INFO = utf8Encode('envdrop/v1/content');
 
 /** Thrown for every decrypt failure. The message is deliberately generic. */
@@ -92,7 +92,7 @@ async function deriveContentKey(
   linkKey: Uint8Array,
   kdf: ScryptParams | undefined,
   passphrase: string | undefined,
-  usage: KeyUsage,
+  usage: 'encrypt' | 'decrypt',
 ): Promise<CryptoKey> {
   let ikm: Bytes = concatBytes(linkKey);
   let salt: Bytes = new Uint8Array(0);
