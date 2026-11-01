@@ -1,9 +1,22 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import {
+  addToGitignore,
+  ApiClient,
+  backupFile,
+  decryptShare,
+  type FetchedShare,
+  fetchShare,
+  gitignoreEntriesFor,
+  normalizeServerUrl,
+  safeIncomingName,
+  share,
+} from '@envdrop/core';
+import {
   DecryptionError,
   EXPIRY_OPTIONS,
   type ExpiryOption,
+  generateExample,
   MAX_PLAINTEXT_BYTES,
   mergeEnv,
   needsPassphrase,
@@ -12,40 +25,22 @@ import {
   type SharePayload,
 } from '@envdrop/shared';
 import * as vscode from 'vscode';
-import { ApiClient, normalizeServerUrl } from '@envdrop/core';
-import { backupFile, findEnvFiles, isShareableEnvFile, safeIncomingName } from '@envdrop/core';
-import {
-  addToGitignore,
-  checkIgnored,
-  defaultGitRunner,
-  type GitRunner,
-  gitignoreEntriesFor,
-  type IgnoreCheck,
-  untrack,
-} from '@envdrop/core';
-import { decryptShare, type FetchedShare, fetchShare, share } from '@envdrop/core';
 import { cfg, EXPIRY_LABELS } from './config';
 import { showEnvReview } from './diffWebview';
+import { type EnvFileInfo, type EnvState, envKind, findExample } from './envState';
+import { ensureGitignored, gitignoreDirFor, ignoreCheck, relTo } from './gitGuard';
+import { showKeysPanel } from './keysPanel';
 import type { RevokeStore } from './revokeStore';
+import { showSharePanel } from './sharePanel';
 
-/** In untrusted workspaces we never spawn git (repo config such as core.fsmonitor can run code). */
-export function gitRunner(): GitRunner {
-  if (vscode.workspace.isTrusted) return defaultGitRunner;
-  return async () => {
-    throw Object.assign(new Error('untrusted workspace'), { code: 'ENOENT' });
-  };
-}
-
-export function ignoreCheck(file: string): Promise<IgnoreCheck> {
-  return checkIgnored(file, { git: gitRunner() });
+export interface Deps {
+  context: vscode.ExtensionContext;
+  store: RevokeStore;
+  state: EnvState;
 }
 
 function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : 'Unexpected error';
-}
-
-function relTo(file: string): string {
-  return vscode.workspace.asRelativePath(file, true);
 }
 
 function formatExpiry(expiresAt: number): string {
@@ -53,144 +48,119 @@ function formatExpiry(expiresAt: number): string {
   return mins >= 120 ? `${Math.round(mins / 60)} h` : `${mins} min`;
 }
 
-/** Returns the folder whose .gitignore should get the entry (repo root, else workspace folder). */
-function gitignoreDirFor(file: string, check: IgnoreCheck): string {
-  return (
-    check.repoRoot ??
-    vscode.workspace.getWorkspaceFolder(vscode.Uri.file(file))?.uri.fsPath ??
-    path.dirname(file)
-  );
-}
+const ENV_ICON: Record<string, string> = {
+  base: '$(file-code)',
+  local: '$(device-desktop)',
+  development: '$(beaker)',
+  staging: '$(rocket)',
+  production: '$(flame)',
+  test: '$(check-all)',
+  other: '$(file)',
+};
+const GIT_LABEL: Record<string, string> = {
+  ignored: '$(lock) gitignored',
+  'not-ignored': '$(warning) NOT gitignored',
+  tracked: '$(error) tracked by git',
+  'no-repo': '$(circle-slash) no git repo',
+};
 
-/**
- * Warns if `file` is not protected by .gitignore. Resolves to true if the caller should
- * continue (protected now, or the user chose to proceed anyway).
- */
-export async function ensureGitignored(
-  file: string,
-  context: 'share' | 'pull' | 'open',
-): Promise<boolean> {
-  const check = await ignoreCheck(file);
-  if (check.status === 'ignored' || check.status === 'no-repo') return true;
-  const rel = relTo(file);
-  const dir = gitignoreDirFor(file, check);
-
-  if (check.status === 'tracked') {
-    const stop = 'Stop tracking & add to .gitignore';
-    const anyway = context === 'share' ? 'Share anyway' : 'Continue';
-    const pick = await vscode.window.showWarningMessage(
-      `"${rel}" is tracked by git: it is (or will be) committed, and may already be in your history. Rotate any secrets that were pushed.`,
-      { modal: context !== 'open' },
-      stop,
-      anyway,
-    );
-    if (pick === stop) {
-      await untrack(file, gitRunner());
-      await addToGitignore(dir, gitignoreEntriesFor(file, dir));
-      void vscode.window.showInformationMessage(
-        `EnvDrop: "${rel}" is no longer tracked and is now in .gitignore. Commit the change to .gitignore.`,
-      );
-      return true;
-    }
-    return pick === anyway;
-  }
-
-  const add = 'Add to .gitignore';
-  const anyway = context === 'share' ? 'Share anyway' : 'Continue';
-  const pick = await vscode.window.showWarningMessage(
-    `"${rel}" is not covered by .gitignore, so it could be committed by accident.`,
-    { modal: context !== 'open' },
-    add,
-    anyway,
-  );
-  if (pick === add) {
-    await addToGitignore(dir, gitignoreEntriesFor(file, dir));
-    void vscode.window.showInformationMessage(
-      `EnvDrop: added "${path.basename(file)}" to ${relTo(path.join(dir, '.gitignore'))}.`,
-    );
-    return true;
-  }
-  return pick === anyway;
-}
-
-async function pickEnvFile(arg?: vscode.Uri): Promise<string | undefined> {
+/** Environment-aware picker (.env, .env.development, .env.staging, .env.production…). */
+async function pickEnvFile(
+  state: EnvState,
+  title: string,
+  arg?: vscode.Uri,
+): Promise<string | undefined> {
   if (arg?.scheme === 'file') return arg.fsPath;
+  await state.refresh();
+  const files = [...state.files];
   const active = vscode.window.activeTextEditor?.document.uri;
-  const folders = vscode.workspace.workspaceFolders ?? [];
-  const found = (await Promise.all(folders.map((f) => findEnvFiles(f.uri.fsPath)))).flat();
-  if (
-    active?.scheme === 'file' &&
-    isShareableEnvFile(active.fsPath) &&
-    !found.includes(active.fsPath)
-  ) {
-    found.unshift(active.fsPath);
+  if (active?.scheme === 'file') {
+    const i = files.findIndex((f) => f.path === active.fsPath);
+    if (i > 0) files.unshift(...files.splice(i, 1));
   }
-  if (found.length === 1) return found[0];
-  const browse = '$(folder-opened) Choose another file…';
-  const items: vscode.QuickPickItem[] = [
-    ...found.map((f) => ({
-      label: path.basename(f),
-      description: relTo(path.dirname(f)),
-      detail: f,
-    })),
-    { label: browse },
-  ];
+  if (files.length === 1) return files[0]!.path;
+  type Item = vscode.QuickPickItem & { file?: EnvFileInfo; browse?: boolean };
+  const items: Item[] = files.map((f) => ({
+    label: `${ENV_ICON[f.env]} ${f.name}`,
+    description: `${f.env === 'other' || f.env === 'base' ? '' : f.env + ' · '}${f.keyCount} keys · ${GIT_LABEL[f.ignore]}`,
+    detail: f.rel !== f.name ? f.rel : undefined,
+    file: f,
+  }));
+  if (items.length) items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+  items.push({ label: '$(folder-opened) Choose another file…', browse: true });
   const pick =
-    found.length === 0
-      ? { label: browse }
-      : await vscode.window.showQuickPick(items, {
-          title: 'EnvDrop: which env file do you want to share?',
-        });
+    files.length === 0
+      ? items[items.length - 1]
+      : await vscode.window.showQuickPick(items, { title, matchOnDescription: true });
   if (!pick) return undefined;
-  if (pick.label === browse) {
+  if (pick.browse) {
     const uris = await vscode.window.showOpenDialog({
       canSelectMany: false,
-      openLabel: 'Share',
-      title: 'Select an env file to share',
+      openLabel: 'Select',
+      title,
     });
     return uris?.[0]?.fsPath;
   }
-  return pick.detail;
+  return pick.file?.path;
 }
 
-export async function shareCommand(store: RevokeStore, arg?: vscode.Uri): Promise<void> {
+export async function shareCommand(
+  { context, store, state }: Deps,
+  arg?: vscode.Uri,
+): Promise<void> {
   const c = cfg();
   try {
     normalizeServerUrl(c.serverUrl);
   } catch (e) {
-    void vscode.window.showErrorMessage(`EnvDrop: ${errMsg(e)}`);
+    void vscode.window
+      .showErrorMessage(`EnvDrop: ${errMsg(e)}`, 'Open Settings')
+      .then(
+        (p) =>
+          p && vscode.commands.executeCommand('workbench.action.openSettings', 'envdrop.serverUrl'),
+      );
     return;
   }
-  const file = await pickEnvFile(arg);
+  const file = await pickEnvFile(state, 'EnvDrop: which environment do you want to share?', arg);
   if (!file) return;
   if (!(await ensureGitignored(file, 'share'))) return;
+  void state.refresh();
+
+  const kind = envKind(path.basename(file));
+  if (kind === 'production') {
+    const ok = await vscode.window.showWarningMessage(
+      `You're about to share PRODUCTION secrets (${path.basename(file)}).`,
+      { modal: true, detail: 'Consider a short expiry, a single view and a passphrase.' },
+      'Continue',
+    );
+    if (ok !== 'Continue') return;
+  }
 
   const expiryItems = (Object.keys(EXPIRY_OPTIONS) as ExpiryOption[]).map((k) => ({
-    label: EXPIRY_LABELS[k],
+    label: `$(watch) ${EXPIRY_LABELS[k]}`,
     key: k,
     description: k === c.defaultExpiry ? 'default' : undefined,
   }));
   expiryItems.sort((a, b) => (a.key === c.defaultExpiry ? -1 : b.key === c.defaultExpiry ? 1 : 0));
   const expiry = await vscode.window.showQuickPick(expiryItems, {
-    title: 'EnvDrop: link expires after…',
+    title: 'EnvDrop: the link self-destructs after… (step 1/3)',
   });
   if (!expiry) return;
 
   const viewChoices = [...new Set([c.defaultMaxViews, 1, 2, 3, 5, 10])];
   const views = await vscode.window.showQuickPick(
     viewChoices.map((n) => ({
-      label: n === 1 ? '1 view (burn after read)' : `${n} views`,
+      label: n === 1 ? '$(flame) 1 view: burn after reading' : `$(eye) ${n} views`,
       n,
       description: n === c.defaultMaxViews ? 'default' : undefined,
     })),
-    { title: 'EnvDrop: how many times can the link be opened?' },
+    { title: 'EnvDrop: how many times can it be opened? (step 2/3)' },
   );
   if (!views) return;
 
   const passphrase = await vscode.window.showInputBox({
-    title: 'EnvDrop: optional passphrase',
+    title: 'EnvDrop: optional passphrase (step 3/3)',
     prompt:
-      'Leave empty for none. If set, the recipient needs the link AND this passphrase. Send it through a different channel.',
+      'Press Enter to skip. If set, the recipient needs the link AND this passphrase. Send it through a different channel.',
     password: true,
     ignoreFocusOut: true,
     validateInput: (v) =>
@@ -225,44 +195,44 @@ export async function shareCommand(store: RevokeStore, arg?: vscode.Uri): Promis
     void vscode.window.showErrorMessage(`EnvDrop: could not read file: ${errMsg(e)}`);
     return;
   }
-  const keyCount = parseEnv(content).entries.size;
 
   try {
     const res = await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: 'EnvDrop: encrypting and uploading…',
-      },
-      () =>
-        share({
+      { location: vscode.ProgressLocation.Notification, title: 'EnvDrop', cancellable: false },
+      async (p) => {
+        p.report({ message: passphrase ? 'Deriving key from passphrase…' : 'Encrypting locally…' });
+        const r = await share({
           serverUrl: c.serverUrl,
           name: path.basename(file),
           content,
           ttlSeconds: EXPIRY_OPTIONS[expiry.key],
           maxViews: views.n,
           passphrase: passphrase || undefined,
-        }),
+        });
+        p.report({ message: 'Uploaded ciphertext ✓' });
+        return r;
+      },
     );
+    const createdAt = Date.now();
     await store.add({
       id: res.id,
       origin: res.origin,
       revokeToken: res.revokeToken,
       expiresAt: res.expiresAt,
       fileName: path.basename(file),
-      createdAt: Date.now(),
+      createdAt,
       maxViews: views.n,
     });
     await vscode.env.clipboard.writeText(res.link);
-    const choice = await vscode.window.showInformationMessage(
-      `EnvDrop: link to ${path.basename(file)} (${keyCount} keys) COPIED TO CLIPBOARD. ` +
-        `Expires in ${EXPIRY_LABELS[expiry.key]}, ${views.n === 1 ? 'burns after 1 view' : `${views.n} views`}.` +
-        (passphrase ? ' Send the passphrase separately.' : '') +
-        ' Anyone with the link can open it, so share it directly with the recipient.',
-      'Revoke now',
-      'Clear clipboard',
-    );
-    if (choice === 'Revoke now') await revokeOne(store, res.id, res.origin, res.revokeToken);
-    if (choice === 'Clear clipboard') await vscode.env.clipboard.writeText('');
+    vscode.window.setStatusBarMessage('$(check) EnvDrop: link copied to clipboard', 5000);
+    showSharePanel(context, store, {
+      ...res,
+      fileName: path.basename(file),
+      keyCount: parseEnv(content).entries.size,
+      createdAt,
+      maxViews: views.n,
+      passphrase: Boolean(passphrase),
+    });
   } catch (e) {
     void vscode.window.showErrorMessage(`EnvDrop: share failed: ${errMsg(e)}`);
   }
@@ -277,7 +247,9 @@ async function askLink(): Promise<string | undefined> {
     /* ignore */
   }
   return vscode.window.showInputBox({
-    title: 'EnvDrop: paste the share link',
+    title: prefill
+      ? 'EnvDrop: link found on your clipboard. Press Enter to pull'
+      : 'EnvDrop: paste the share link',
     value: prefill,
     placeHolder: 'https://…/s/<id>#<key>',
     ignoreFocusOut: true,
@@ -298,7 +270,7 @@ async function decryptWithPrompt(fetched: FetchedShare): Promise<SharePayload | 
       prompt:
         attempt === 0
           ? 'Enter the passphrase the sender gave you.'
-          : 'Wrong passphrase, try again.',
+          : `Wrong passphrase, try again (${5 - attempt} left).`,
       password: true,
       ignoreFocusOut: true,
     });
@@ -341,7 +313,7 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
-export async function pullCommand(context: vscode.ExtensionContext): Promise<void> {
+export async function pullCommand({ context, state }: Deps): Promise<void> {
   const link = await askLink();
   if (!link) return;
   const parsed = parseShareLink(link)!;
@@ -354,8 +326,11 @@ export async function pullCommand(context: vscode.ExtensionContext): Promise<voi
   }
   if (parsed.origin !== configured) {
     const ok = await vscode.window.showWarningMessage(
-      `This link points to ${parsed.origin}, not your configured EnvDrop server. Only continue if you trust the sender. The file could set variables that change how your tools run.`,
-      { modal: true },
+      `This link points to ${parsed.origin}, not your configured EnvDrop server.`,
+      {
+        modal: true,
+        detail: 'Only continue if you trust the sender. An env file can change how your tools run.',
+      },
       'Continue',
     );
     if (ok !== 'Continue') return;
@@ -363,7 +338,7 @@ export async function pullCommand(context: vscode.ExtensionContext): Promise<voi
 
   try {
     const fetched = await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'EnvDrop: downloading…' },
+      { location: vscode.ProgressLocation.Notification, title: 'EnvDrop: downloading ciphertext…' },
       () => fetchShare(link),
     );
     const payload = await decryptWithPrompt(fetched);
@@ -386,8 +361,8 @@ export async function pullCommand(context: vscode.ExtensionContext): Promise<voi
     if (!review) {
       void vscode.window.showInformationMessage(
         fetched.viewsLeft === 0
-          ? 'EnvDrop: cancelled. Nothing was written. Note: this link is now burned; ask the sender for a new one if needed.'
-          : 'EnvDrop: cancelled. Nothing was written.',
+          ? 'EnvDrop: cancelled, nothing was written. This link is now burned; ask the sender for a new one if needed.'
+          : 'EnvDrop: cancelled, nothing was written.',
       );
       return;
     }
@@ -411,10 +386,12 @@ export async function pullCommand(context: vscode.ExtensionContext): Promise<voi
       review.mode === 'merge' && hasLocal
         ? `updated ${review.apply.length} key(s), removed ${review.remove.length}`
         : `wrote ${parseEnv(next).entries.size} key(s)`;
+    vscode.window.setStatusBarMessage(`$(check) EnvDrop: ${summary}`, 6000);
     void vscode.window.showInformationMessage(
       `EnvDrop: ${summary} in ${relTo(target)}.${backupPath ? ` Backup: ${path.basename(backupPath)}.` : ''}`,
     );
     await ensureGitignored(target, 'pull');
+    void state.refresh();
   } catch (e) {
     void vscode.window.showErrorMessage(`EnvDrop: pull failed: ${errMsg(e)}`);
   }
@@ -437,7 +414,7 @@ async function revokeOne(
   }
 }
 
-export async function revokeCommand(store: RevokeStore): Promise<void> {
+export async function revokeCommand({ store }: Deps): Promise<void> {
   const links = await store.list();
   if (links.length === 0) {
     void vscode.window.showInformationMessage(
@@ -450,8 +427,8 @@ export async function revokeCommand(store: RevokeStore): Promise<void> {
     [
       ...links.map((l) => ({
         label: `$(link) ${l.fileName}`,
-        description: `expires in ${formatExpiry(l.expiresAt)} · ${l.maxViews} view(s) max`,
-        detail: `${l.origin} · created ${new Date(l.createdAt).toLocaleString()}`,
+        description: `$(watch) ${formatExpiry(l.expiresAt)} left · ${l.maxViews} view(s) max`,
+        detail: `${new URL(l.origin).host} · created ${new Date(l.createdAt).toLocaleString()}`,
         id: l.id,
       })),
       {
@@ -468,19 +445,11 @@ export async function revokeCommand(store: RevokeStore): Promise<void> {
   for (const l of targets) await revokeOne(store, l.id, l.origin, l.revokeToken);
 }
 
-export async function checkGitignoreCommand(arg?: vscode.Uri): Promise<void> {
-  const files =
-    arg?.scheme === 'file'
-      ? [arg.fsPath]
-      : (
-          await Promise.all(
-            (vscode.workspace.workspaceFolders ?? []).map((f) => findEnvFiles(f.uri.fsPath)),
-          )
-        ).flat();
+export async function checkGitignoreCommand({ state }: Deps, arg?: vscode.Uri): Promise<void> {
+  await state.refresh();
+  const files = arg?.scheme === 'file' ? [arg.fsPath] : state.files.map((f) => f.path);
   if (files.length === 0) {
-    void vscode.window.showInformationMessage(
-      'EnvDrop: no env files found in the workspace root(s).',
-    );
+    void vscode.window.showInformationMessage('EnvDrop: no env files found in the workspace.');
     return;
   }
   let allGood = true;
@@ -488,35 +457,103 @@ export async function checkGitignoreCommand(arg?: vscode.Uri): Promise<void> {
     const s = await ignoreCheck(f);
     if (s.status === 'not-ignored' || s.status === 'tracked') {
       allGood = false;
-      await ensureGitignored(f, 'pull');
+      await ensureGitignored(f, 'fix');
     }
   }
+  void state.refresh();
   if (allGood)
     void vscode.window.showInformationMessage(
-      `EnvDrop: ${files.length} env file(s) checked, all are gitignored.`,
+      `EnvDrop: ${files.length} env file(s) checked, all protected by .gitignore.`,
     );
 }
 
 /** One-time, dismissible check on workspace open. */
-export async function checkOnOpen(context: vscode.ExtensionContext): Promise<void> {
+export async function checkOnOpen({ context, state }: Deps): Promise<void> {
   if (!cfg().checkGitignoreOnOpen) return;
   if (context.workspaceState.get<boolean>('envdrop.dontShowGitignoreWarning')) return;
-  const folders = vscode.workspace.workspaceFolders ?? [];
-  const files = (await Promise.all(folders.map((f) => findEnvFiles(f.uri.fsPath)))).flat();
-  const bad: string[] = [];
-  for (const f of files) {
-    const s = await ignoreCheck(f);
-    if (s.status === 'not-ignored' || s.status === 'tracked') bad.push(f);
-  }
+  await state.refresh();
+  const bad = state.problems;
   if (bad.length === 0) return;
-  const names = bad.map((f) => relTo(f)).join(', ');
-  const fix = 'Fix';
+  const names = bad.map((f) => f.rel).join(', ');
+  const fix = 'Protect now';
+  const show = 'Show me';
   const never = "Don't show again";
   const pick = await vscode.window.showWarningMessage(
     `EnvDrop: ${names} ${bad.length === 1 ? 'is' : 'are'} not protected by .gitignore and could be committed by accident.`,
     fix,
+    show,
     never,
   );
   if (pick === never) await context.workspaceState.update('envdrop.dontShowGitignoreWarning', true);
-  if (pick === fix) for (const f of bad) await ensureGitignored(f, 'pull');
+  if (pick === show) await vscode.commands.executeCommand('envdrop.home.focus');
+  if (pick === fix) {
+    for (const f of bad) await ensureGitignored(f.path, 'fix');
+    void state.refresh();
+  }
+}
+
+/** Phase 2: create or update .env.example next to an env file (values stripped). */
+export async function generateExampleCommand({ state }: Deps, arg?: vscode.Uri): Promise<void> {
+  const file = await pickEnvFile(state, 'EnvDrop: generate .env.example from which file?', arg);
+  if (!file) return;
+  const envText = await fs.readFile(file, 'utf8');
+  const examplePath = (await findExample(file)) ?? path.join(path.dirname(file), '.env.example');
+  const existing = (await exists(examplePath)) ? await fs.readFile(examplePath, 'utf8') : undefined;
+  const next = generateExample(envText, existing);
+  if (existing !== undefined) {
+    if (existing === next) {
+      void vscode.window.showInformationMessage(
+        `EnvDrop: ${path.basename(examplePath)} is already up to date.`,
+      );
+      return;
+    }
+    const ok = await vscode.window.showInformationMessage(
+      `Update ${relTo(examplePath)} from ${path.basename(file)}?`,
+      {
+        modal: true,
+        detail:
+          'Keys and comments are synced, values are stripped, and placeholders you wrote in the example are kept.',
+      },
+      'Update',
+    );
+    if (ok !== 'Update') return;
+  }
+  await fs.writeFile(examplePath, next, 'utf8');
+  await vscode.window.showTextDocument(vscode.Uri.file(examplePath), { preview: true });
+
+  // A `.env*` rule also hides the example from git, which is a common gotcha.
+  const check = await ignoreCheck(examplePath);
+  if (check.status === 'ignored') {
+    const add = 'Allow in .gitignore';
+    const pick = await vscode.window.showWarningMessage(
+      `${path.basename(examplePath)} is gitignored (probably by a ".env*" rule), so teammates won't get it.`,
+      add,
+    );
+    if (pick === add) {
+      const dir = gitignoreDirFor(examplePath, check);
+      const rel = path.relative(dir, examplePath).split(path.sep).join('/');
+      await addToGitignore(dir, [`!${rel.includes('/') ? '/' + rel : path.basename(examplePath)}`]);
+    }
+  }
+  void vscode.window.showInformationMessage(
+    `EnvDrop: wrote ${relTo(examplePath)} (${parseEnv(next).entries.size} keys, no values). Safe to commit.`,
+  );
+  void state.refresh();
+}
+
+/** Phase 2: compare .env with .env.example. */
+export async function checkKeysCommand(deps: Deps, arg?: vscode.Uri): Promise<void> {
+  const file = await pickEnvFile(deps.state, 'EnvDrop: check keys of which env file?', arg);
+  if (!file) return;
+  const example = await findExample(file);
+  if (!example) {
+    const gen = 'Generate .env.example';
+    const pick = await vscode.window.showInformationMessage(
+      `EnvDrop: there's no .env.example next to ${path.basename(file)} to compare against.`,
+      gen,
+    );
+    if (pick === gen) await generateExampleCommand(deps, vscode.Uri.file(file));
+    return;
+  }
+  await showKeysPanel(deps.context, file, example);
 }

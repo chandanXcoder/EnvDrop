@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -24,18 +25,17 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.mjs', 'extension/media/**/*.js', 'extension/esbuild.mjs', 'server/build-web.mjs'],
-    languageOptions: {
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        acquireVsCodeApi: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-      },
-    },
+    files: ['**/*.mjs', 'cli/bin/**/*.js'],
+    languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
+  },
+  {
+    // Webview scripts: plain browser JS with JSDoc types.
+    files: ['extension/media/**/*.js'],
+    languageOptions: {
+      sourceType: 'script',
+      globals: { ...globals.browser, acquireVsCodeApi: 'readonly' },
+    },
+    rules: { '@typescript-eslint/ban-ts-comment': 'off' },
   },
 );

@@ -12,3 +12,4 @@ coverage/
 !.env.example
 !.env.sample
 .env.backup
+extension/media/codicons/

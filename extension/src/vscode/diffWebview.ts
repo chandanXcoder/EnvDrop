@@ -1,5 +1,6 @@
 import { diffEnv, type EnvDiff, maskValue, parseEnv } from '@envdrop/shared';
 import * as vscode from 'vscode';
+import { renderHtml, webviewOptions } from './webview';
 
 export type ReviewResult =
   | { mode: 'merge'; apply: string[]; remove: string[]; backup: boolean }
@@ -25,12 +26,6 @@ function rowsFrom(d: EnvDiff): Row[] {
   ];
 }
 
-function nonce(): string {
-  const b = new Uint8Array(18);
-  crypto.getRandomValues(b);
-  return Buffer.from(b).toString('base64url');
-}
-
 /**
  * Masked, key-level review of an incoming env file.
  *
@@ -45,22 +40,16 @@ export function showEnvReview(
   const local = opts.localText !== undefined ? parseEnv(opts.localText) : undefined;
   const diff = diffEnv(local ?? parseEnv(''), incoming);
 
-  const media = vscode.Uri.joinPath(context.extensionUri, 'media');
   const panel = vscode.window.createWebviewPanel(
     'envdrop.review',
     `EnvDrop: review ${opts.targetName}`,
     vscode.ViewColumn.Active,
-    { enableScripts: true, localResourceRoots: [media], retainContextWhenHidden: false },
+    { ...webviewOptions(context.extensionUri), retainContextWhenHidden: false },
   );
-  const n = nonce();
-  const css = panel.webview.asWebviewUri(vscode.Uri.joinPath(media, 'review.css'));
-  const js = panel.webview.asWebviewUri(vscode.Uri.joinPath(media, 'review.js'));
-  panel.webview.html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource}; script-src 'nonce-${n}';">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="${css}"></head>
-<body><main id="app"></main><script nonce="${n}" src="${js}"></script></body></html>`;
+  panel.iconPath = vscode.Uri.joinPath(context.extensionUri, 'media', 'icon.png');
+  panel.webview.html = renderHtml(panel.webview, context.extensionUri, 'review.js', {
+    title: 'Review',
+  });
 
   return new Promise((resolve) => {
     let settled = false;
