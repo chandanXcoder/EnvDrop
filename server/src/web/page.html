@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>EnvDrop: encrypted .env</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>EnvDrop</h1>
+      <p class="sub">An end-to-end encrypted .env file was shared with you.</p>
+
+      <section id="intro">
+        <p>
+          Decryption happens <strong>in this browser</strong> using the key in the link's
+          <code>#fragment</code>, which is never sent to the server.
+        </p>
+        <p class="warn">
+          Opening it may use up the link (links are often burn-after-read). Make sure you're ready
+          to save the contents.
+        </p>
+        <button id="decrypt" type="button">Decrypt</button>
+        <p class="hint">
+          Using VS Code? Run <code>EnvDrop: Pull .env</code> instead. It shows a masked diff before
+          writing anything.
+        </p>
+      </section>
+
+      <section id="pass" hidden>
+        <label for="passphrase">This link is also protected by a passphrase:</label>
+        <input id="passphrase" type="password" autocomplete="off" spellcheck="false" />
+        <button id="unlock" type="button">Unlock</button>
+      </section>
+
+      <section id="result" hidden>
+        <p><span id="filename"></span> · <span id="views"></span></p>
+        <textarea id="content" readonly spellcheck="false" rows="14"></textarea>
+        <div class="row">
+          <button id="copy" type="button">Copy</button>
+          <button id="download" type="button">Download</button>
+          <button id="clear" type="button" class="secondary">Clear from page</button>
+        </div>
+      </section>
+
+      <p id="status" role="status" aria-live="polite"></p>
+
+      <footer>
+        <p>
+          Trust note: this page's code is served by the same server that stores the encrypted data.
+          A compromised server could serve altered code. For the strongest guarantee, use the VS
+          Code extension or CLI.
+        </p>
+      </footer>
+    </main>
+    <script type="module" src="/assets/client.js"></script>
+  </body>
+</html>
