@@ -6,3 +6,5 @@ export * from './crypto';
 export * from './link';
 export * from './envParser';
 export * from './envDiff';
+export * from './secretPatterns';
+export * from './scanner';
