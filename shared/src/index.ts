@@ -4,3 +4,5 @@ export * from './types';
 export * from './envelope';
 export * from './crypto';
 export * from './link';
+export * from './envParser';
+export * from './envDiff';
