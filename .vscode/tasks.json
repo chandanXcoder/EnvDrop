@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "envdrop: build extension",
+      "type": "shell",
+      "command": "node esbuild.mjs",
+      "options": { "cwd": "${workspaceFolder}/extension" },
+      "problemMatcher": "$esbuild"
+    },
+    {
+      "label": "envdrop: server (wrangler dev)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/server" },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
