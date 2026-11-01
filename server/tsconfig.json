@@ -5,5 +5,5 @@
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src", "test"],
-  "exclude": ["src/web/client.ts"]
+  "exclude": ["src/web/client.ts", "src/node.ts", "src/node-main.ts", "test/node.test.ts"]
 }

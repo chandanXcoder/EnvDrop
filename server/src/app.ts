@@ -15,7 +15,7 @@ import {
 } from '@envdrop/shared';
 import { apiError, json, PAGE_CSP, withSecurityHeaders } from './headers';
 import type { RateBucket, RateLimiter } from './rateLimit';
-import type { SecretStore } from './store';
+import { type SecretStore, StoreFullError } from './store';
 
 export interface WebAssets {
   /** /s/:id decrypt page */
@@ -207,6 +207,10 @@ export function createApp(deps: AppDeps): Handler {
       const { res, csp } = await route(req);
       return withSecurityHeaders(res, csp);
     } catch (e) {
+      if (e instanceof StoreFullError)
+        return withSecurityHeaders(
+          apiError(503, 'Server is at capacity, try again later', { 'Retry-After': '60' }),
+        );
       // Never log request bodies or ids; the error class is enough to debug.
       console.error('envdrop: internal error', e instanceof Error ? e.name : typeof e);
       return withSecurityHeaders(apiError(500, 'Internal error'));

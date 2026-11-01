@@ -25,3 +25,17 @@ jobs:
       - run: npm run build
       - name: Package extension (dry run)
         run: npm run package --workspace extension
+      - name: CLI smoke test
+        run: node cli/dist/envdrop.mjs --help
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build self-host image
+        run: docker build -t envdrop-server:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --name envdrop -p 8787:8787 envdrop-server:ci
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8787/health && exit 0; sleep 1; done
+          docker logs envdrop; exit 1

@@ -120,7 +120,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider, vscode.Disp
       case 'settings':
         return void vscode.commands.executeCommand(
           'workbench.action.openSettings',
-          '@ext:your-publisher.envdrop',
+          '@ext:your-publisher.envdrop-vscode',
         );
       case 'link': {
         if (m.to === 'threat') return void vscode.commands.executeCommand('envdrop.learnMore');

@@ -9,7 +9,8 @@
     "shared",
     "core",
     "server",
-    "extension"
+    "extension",
+    "cli"
   ],
   "engines": {
     "node": ">=20"

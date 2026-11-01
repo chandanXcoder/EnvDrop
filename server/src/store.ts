@@ -27,3 +27,11 @@ export interface SecretStore {
   /** Deletes the record if the revoke hash matches (constant-time). */
   revoke(id: string, revokeHash: string, now: number): Promise<boolean>;
 }
+
+/** Thrown by a store that has reached its capacity (self-hosted memory store). */
+export class StoreFullError extends Error {
+  constructor() {
+    super('Secret store is full');
+    this.name = 'StoreFullError';
+  }
+}
