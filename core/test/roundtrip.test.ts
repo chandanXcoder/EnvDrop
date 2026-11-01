@@ -10,9 +10,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../server/src/app';
 import { MemoryStore } from '../../server/src/memoryStore';
 import { MemoryRateLimiter } from '../../server/src/rateLimit';
-import { ApiClient, type FetchLike } from '../src/core/apiClient';
-import { backupFile } from '../src/core/envFiles';
-import { decryptShare, fetchShare, share } from '../src/core/shareService';
+import { ApiClient, type FetchLike } from '../src/apiClient';
+import { backupFile } from '../src/envFiles';
+import { decryptShare, fetchShare, share } from '../src/shareService';
 
 const SERVER = 'https://envdrop.test';
 let store: MemoryStore;

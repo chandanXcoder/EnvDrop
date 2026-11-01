@@ -9,7 +9,7 @@ import {
   checkWithFallback,
   type GitRunner,
   gitignoreEntriesFor,
-} from '../src/core/gitignore';
+} from '../src/gitignore';
 
 let dir: string;
 const w = (rel: string, content = '') => {

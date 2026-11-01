@@ -12,8 +12,8 @@ import {
   type SharePayload,
 } from '@envdrop/shared';
 import * as vscode from 'vscode';
-import { ApiClient, normalizeServerUrl } from '../core/apiClient';
-import { backupFile, findEnvFiles, isShareableEnvFile, safeIncomingName } from '../core/envFiles';
+import { ApiClient, normalizeServerUrl } from '@envdrop/core';
+import { backupFile, findEnvFiles, isShareableEnvFile, safeIncomingName } from '@envdrop/core';
 import {
   addToGitignore,
   checkIgnored,
@@ -22,8 +22,8 @@ import {
   gitignoreEntriesFor,
   type IgnoreCheck,
   untrack,
-} from '../core/gitignore';
-import { decryptShare, type FetchedShare, fetchShare, share } from '../core/shareService';
+} from '@envdrop/core';
+import { decryptShare, type FetchedShare, fetchShare, share } from '@envdrop/core';
 import { cfg, EXPIRY_LABELS } from './config';
 import { showEnvReview } from './diffWebview';
 import type { RevokeStore } from './revokeStore';

@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { scanUnifiedDiff, type SecretFinding, sensitiveFilenameReason } from '@envdrop/shared';
 import ignore from 'ignore';
 import * as vscode from 'vscode';
-import { addToGitignore, defaultGitRunner, gitignoreEntriesFor, untrack } from '../core/gitignore';
+import { addToGitignore, defaultGitRunner, gitignoreEntriesFor, untrack } from '@envdrop/core';
 import { cfg } from './config';
 import type { API, Change, GitExtension, Repository } from './gitApi';
 

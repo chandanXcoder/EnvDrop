@@ -159,6 +159,7 @@
     "publish": "npm run build && vsce publish --no-dependencies"
   },
   "dependencies": {
+    "@envdrop/core": "0.1.0",
     "@envdrop/shared": "0.1.0",
     "ignore": "^7.0.5"
   },

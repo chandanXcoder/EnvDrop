@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isShareableEnvFile, safeIncomingName } from '../src/core/envFiles';
+import { isShareableEnvFile, safeIncomingName } from '../src/envFiles';
 
 describe('env file helpers', () => {
   it('identifies shareable env files', () => {
