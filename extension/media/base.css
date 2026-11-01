@@ -1,0 +1,815 @@
+/* EnvDrop webview design system. Follows the active VS Code theme; adds a brand accent. */
+:root {
+  --ed-violet: #7c5cff;
+  --ed-cyan: #22d3ee;
+  --ed-grad: linear-gradient(135deg, var(--ed-violet), var(--ed-cyan));
+  --ed-ok: var(--vscode-testing-iconPassed, #3fb950);
+  --ed-warn: var(--vscode-editorWarning-foreground, #d29922);
+  --ed-err: var(--vscode-errorForeground, #f85149);
+  --ed-add: var(--vscode-gitDecoration-addedResourceForeground, #3fb950);
+  --ed-mod: var(--vscode-gitDecoration-modifiedResourceForeground, #d29922);
+  --ed-del: var(--vscode-gitDecoration-deletedResourceForeground, #f85149);
+  --ed-muted: var(--vscode-descriptionForeground);
+  --ed-border: var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  --ed-card: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  --ed-raise: color-mix(in srgb, var(--vscode-foreground) 6%, transparent);
+  --ed-radius: 10px;
+  --ed-mono: var(--vscode-editor-font-family, ui-monospace, monospace);
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  line-height: 1.5;
+}
+body.panel {
+  background: var(--vscode-editor-background);
+}
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 20px 96px;
+}
+.side {
+  padding: 12px 12px 24px;
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+h1 {
+  font-size: 1.45em;
+}
+h2 {
+  font-size: 1.05em;
+}
+h3 {
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ed-muted);
+  margin: 18px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+p {
+  margin: 4px 0;
+}
+.muted {
+  color: var(--ed-muted);
+}
+.mono {
+  font-family: var(--ed-mono);
+}
+.grad-text {
+  background: var(--ed-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+a,
+.linklike {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+}
+a:hover,
+.linklike:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Header / hero ---------- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--ed-radius);
+  border: 1px solid var(--ed-border);
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--ed-violet) 22%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      120% 140% at 100% 100%,
+      color-mix(in srgb, var(--ed-cyan) 18%, transparent),
+      transparent 60%
+    ),
+    var(--ed-raise);
+  overflow: hidden;
+}
+.hero .logo {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--ed-violet) 45%, transparent));
+}
+.hero .tag {
+  color: var(--ed-muted);
+  font-size: 0.92em;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 6s ease-in-out infinite 1s;
+  pointer-events: none;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.15s ease,
+    box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:focus-visible,
+.chip:focus-visible,
+input:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+.btn.secondary {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+.btn.secondary:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--vscode-foreground);
+  border-color: var(--ed-border);
+}
+.btn.ghost:hover {
+  background: var(--ed-raise);
+}
+.btn.brand {
+  color: #fff;
+  background: var(--ed-grad);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ed-violet) 35%, transparent);
+}
+.btn.brand:hover {
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--ed-violet) 50%, transparent);
+  filter: brightness(1.06);
+}
+.btn.danger {
+  background: transparent;
+  color: var(--ed-err);
+  border-color: color-mix(in srgb, var(--ed-err) 50%, transparent);
+}
+.btn.danger:hover {
+  background: color-mix(in srgb, var(--ed-err) 12%, transparent);
+}
+.btn.small {
+  padding: 2px 8px;
+  font-size: 0.9em;
+}
+.btn.big {
+  padding: 10px 14px;
+  font-size: 1.02em;
+  font-weight: 600;
+}
+.btn[disabled] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-raise);
+  padding: 10px 12px;
+  margin: 8px 0;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+.card:hover {
+  border-color: color-mix(in srgb, var(--ed-violet) 55%, var(--ed-border));
+}
+.card .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.card .title {
+  font-weight: 600;
+  font-family: var(--ed-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.card .spacer {
+  flex: 1;
+}
+.card .actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.stripe-add {
+  box-shadow: inset 3px 0 0 var(--ed-add);
+}
+.stripe-mod {
+  box-shadow: inset 3px 0 0 var(--ed-mod);
+}
+.stripe-del {
+  box-shadow: inset 3px 0 0 var(--ed-del);
+}
+.stripe-ok {
+  box-shadow: inset 3px 0 0 var(--ed-ok);
+}
+.stripe-warn {
+  box-shadow: inset 3px 0 0 var(--ed-warn);
+}
+.stripe-err {
+  box-shadow: inset 3px 0 0 var(--ed-err);
+}
+
+.empty {
+  text-align: center;
+  padding: 18px 8px;
+  color: var(--ed-muted);
+  border: 1px dashed var(--ed-border);
+  border-radius: var(--ed-radius);
+}
+.empty .codicon {
+  font-size: 22px !important;
+  display: block;
+  margin: 0 auto 6px;
+  opacity: 0.8;
+}
+
+/* ---------- Chips / badges ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--ed-border);
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.chip svg {
+  width: 12px;
+  height: 12px;
+}
+.chip.ok {
+  color: var(--ed-ok);
+  border-color: color-mix(in srgb, var(--ed-ok) 45%, transparent);
+  background: color-mix(in srgb, var(--ed-ok) 10%, transparent);
+}
+.chip.warn {
+  color: var(--ed-warn);
+  border-color: color-mix(in srgb, var(--ed-warn) 45%, transparent);
+  background: color-mix(in srgb, var(--ed-warn) 10%, transparent);
+}
+.chip.err {
+  color: var(--ed-err);
+  border-color: color-mix(in srgb, var(--ed-err) 45%, transparent);
+  background: color-mix(in srgb, var(--ed-err) 10%, transparent);
+  animation: pulse 2s ease-in-out infinite;
+}
+.chip.env-production {
+  color: #ff7b72;
+  border-color: #ff7b7255;
+}
+.chip.env-staging {
+  color: #f0b35a;
+  border-color: #f0b35a55;
+}
+.chip.env-development,
+.chip.env-local {
+  color: #58c4dc;
+  border-color: #58c4dc55;
+}
+.chip.env-test {
+  color: #b392f0;
+  border-color: #b392f055;
+}
+.chip.add {
+  color: var(--ed-add);
+}
+.chip.mod {
+  color: var(--ed-mod);
+}
+.chip.del {
+  color: var(--ed-del);
+}
+
+/* ---------- Stats ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.stat {
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  padding: 10px 12px;
+  background: var(--ed-raise);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.stat:hover {
+  transform: translateY(-2px);
+}
+.stat.active {
+  border-color: var(--vscode-focusBorder);
+}
+.stat .n {
+  font-size: 1.8em;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.stat .l {
+  color: var(--ed-muted);
+  font-size: 0.85em;
+}
+.stat.add .n {
+  color: var(--ed-add);
+}
+.stat.mod .n {
+  color: var(--ed-mod);
+}
+.stat.del .n {
+  color: var(--ed-del);
+}
+
+/* ---------- Inputs ---------- */
+input[type='search'],
+input[type='text'] {
+  font: inherit;
+  width: 100%;
+  padding: 6px 10px;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, var(--ed-border));
+  border-radius: 6px;
+}
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.switch .track {
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--ed-border);
+  position: relative;
+  transition: background 0.2s ease;
+  flex: none;
+}
+.switch .track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s cubic-bezier(0.3, 1.4, 0.6, 1);
+}
+.switch input:checked + .track {
+  background: var(--ed-grad);
+}
+.switch input:checked + .track::after {
+  transform: translateX(14px);
+}
+.switch input:focus-visible + .track {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+input[type='checkbox'].check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ed-violet);
+  cursor: pointer;
+}
+
+/* ---------- Progress / countdown ---------- */
+.bar {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--ed-border);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.bar > i {
+  display: block;
+  height: 100%;
+  background: var(--ed-grad);
+  transition: width 1s linear;
+}
+.bar.drain > i {
+  animation: drain linear forwards;
+}
+.ring {
+  --p: 1;
+  width: 64px;
+  height: 64px;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+.ring .bg {
+  stroke: var(--ed-border);
+}
+.ring .fg {
+  stroke: url(#ed-grad);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* ---------- Secret values ---------- */
+.val {
+  font-family: var(--ed-mono);
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: var(--ed-muted);
+  letter-spacing: 0.1em;
+}
+.val.revealed {
+  color: var(--vscode-foreground);
+  letter-spacing: normal;
+  animation: unblur 0.35s ease-out;
+}
+
+/* ---------- Sticky footer ---------- */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ed-border);
+  background: color-mix(in srgb, var(--vscode-editor-background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  animation: slideUp 0.35s ease-out both 0.15s;
+}
+.footer .spacer {
+  flex: 1;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--ed-grad);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  animation: toast 2.2s ease forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ---------- Brand footer ---------- */
+.brandbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ed-border);
+  font-size: 0.9em;
+  color: var(--ed-muted);
+}
+.brandbar svg {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+}
+.gh {
+  fill: currentColor;
+}
+
+/* ---------- Entrance animations ---------- */
+.enter {
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.enter:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.enter:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.enter:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.enter:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.enter:nth-child(n + 6) {
+  animation-delay: 0.2s;
+}
+.pop {
+  animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes shimmer {
+  0%,
+  60% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ed-err) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes drain {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+@keyframes unblur {
+  from {
+    filter: blur(6px);
+    opacity: 0.3;
+  }
+  to {
+    filter: none;
+    opacity: 1;
+  }
+}
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  12%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Share success ---------- */
+.success {
+  text-align: center;
+  padding: 18px 0 8px;
+}
+.success h1 {
+  margin-top: 14px;
+}
+.seal {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+}
+.seal-logo {
+  width: 96px;
+  height: 96px;
+  filter: drop-shadow(0 8px 24px color-mix(in srgb, var(--ed-violet) 55%, transparent));
+  animation: float 4s ease-in-out infinite 0.6s;
+}
+.seal-check {
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--ed-ok);
+  border: 2px solid var(--vscode-editor-background);
+  animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both 0.35s;
+}
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: var(--ed-grad);
+  opacity: 0;
+  animation: burst 0.9s ease-out forwards var(--d);
+  transform: rotate(var(--a)) translateY(0);
+}
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-70px) scale(0.4);
+  }
+}
+.link-card .title {
+  font-weight: 500;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fact-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ed-violet) 14%, transparent);
+}
+.fact-icon .codicon {
+  font-size: 26px !important;
+}
+.big-left {
+  font-size: 1.25em;
+  font-weight: 700;
+}
+.qr-box {
+  margin-top: 12px;
+  text-align: center;
+}
+.qr {
+  width: 220px;
+  height: 220px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  shape-rendering: crispEdges;
+}
+.tips {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* Inline brand marks inside rows/headings stay icon-sized. */
+.row > svg,
+h3 > svg,
+.btn > svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}

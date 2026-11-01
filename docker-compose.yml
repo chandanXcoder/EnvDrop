@@ -1,0 +1,26 @@
+# Self-host EnvDrop:  docker compose up -d   →  http://localhost:8787
+# Put it behind a TLS-terminating reverse proxy (Caddy, Traefik, nginx) for real use:
+# browsers and the extension require https:// for anything but localhost.
+services:
+  envdrop:
+    build: .
+    image: envdrop-server:latest
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8787:8787'
+    environment:
+      # Set when running behind a reverse proxy so per-IP rate limits use X-Forwarded-For.
+      TRUST_PROXY: 'false'
+      # Public https origin, e.g. https://envdrop.example.com
+      PUBLIC_URL: ''
+      # Upper bound on stored secrets (each ≤ 64 KB) to cap memory use.
+      MAX_SECRETS: '10000'
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    pids_limit: 100

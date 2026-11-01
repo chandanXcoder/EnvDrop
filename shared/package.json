@@ -1,0 +1,17 @@
+{
+  "name": "@envdrop/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Crypto, env parser, diff and secret patterns shared by the EnvDrop extension, server and web page.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0"
+  }
+}

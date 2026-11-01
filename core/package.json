@@ -1,0 +1,22 @@
+{
+  "name": "@envdrop/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node-side EnvDrop logic shared by the VS Code extension and the CLI: API client, share/pull, gitignore, env files.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@envdrop/shared": "0.1.0",
+    "ignore": "^7.0.5",
+    "uqr": "^0.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0"
+  }
+}

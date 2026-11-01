@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.vsix
+.wrangler/
+.dev.vars
+server/src/web/generated/
+coverage/
+
+# Never commit env files (EnvDrop eats its own dog food)
+.env
+.env.*
+!.env.example
+!.env.sample
+.env.backup
+extension/media/codicons/

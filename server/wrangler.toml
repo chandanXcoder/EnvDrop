@@ -1,0 +1,35 @@
+# EnvDrop backend. Deploy with `npm run deploy -w server` (runs `wrangler deploy`).
+name = "envdrop"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# No request/console logs are persisted. EnvDrop never logs bodies; turning this
+# off as well keeps request URLs (which contain ids, never keys) out of the dashboard.
+[observability]
+enabled = false
+
+[[durable_objects.bindings]]
+name = "SECRETS"
+class_name = "SecretObject"
+
+# SQLite-backed Durable Objects are available on the Workers Free plan.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SecretObject"]
+
+# Per-IP rate limiting (Workers Rate Limiting API). namespace_id is any unique
+# integer string within your account.
+[[ratelimits]]
+name = "RATE_LIMIT_CREATE"
+namespace_id = "41001"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "RATE_LIMIT_READ"
+namespace_id = "41002"
+simple = { limit = 60, period = 60 }
+
+[[ratelimits]]
+name = "RATE_LIMIT_REVOKE"
+namespace_id = "41003"
+simple = { limit = 20, period = 60 }

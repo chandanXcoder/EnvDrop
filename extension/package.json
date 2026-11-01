@@ -1,0 +1,271 @@
+{
+  "name": "envdrop-vscode",
+  "displayName": "EnvDrop",
+  "description": "Share .env files end-to-end encrypted with expiring, burn-after-read links. Warns before you leak secrets to git.",
+  "version": "0.2.0",
+  "publisher": "your-publisher",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "env",
+    "dotenv",
+    "secrets",
+    "share",
+    "encryption",
+    "gitignore"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "envdrop.share",
+        "title": "Share .env",
+        "category": "EnvDrop",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "envdrop.pull",
+        "title": "Pull .env",
+        "category": "EnvDrop",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "envdrop.revoke",
+        "title": "Revoke link",
+        "category": "EnvDrop",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "envdrop.checkGitignore",
+        "title": "Check .gitignore for env files",
+        "category": "EnvDrop",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "envdrop.generateExample",
+        "title": "Generate .env.example",
+        "category": "EnvDrop",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "envdrop.checkKeys",
+        "title": "Check missing keys (vs .env.example)",
+        "category": "EnvDrop",
+        "icon": "$(checklist)"
+      },
+      {
+        "command": "envdrop.learnMore",
+        "title": "Learn more (threat model)",
+        "category": "EnvDrop",
+        "icon": "$(law)"
+      },
+      {
+        "command": "envdrop.refresh",
+        "title": "Refresh",
+        "category": "EnvDrop",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "submenu": "envdrop.explorer",
+          "when": "resourceScheme == file && resourceFilename =~ /^(\\.env(\\.(?!example$|sample$|template$|backup$)[^/\\\\]+)?|.+\\.env)$/",
+          "group": "7_modification@9"
+        }
+      ],
+      "envdrop.explorer": [
+        {
+          "command": "envdrop.share",
+          "group": "1_share@1"
+        },
+        {
+          "command": "envdrop.checkKeys",
+          "group": "2_keys@1"
+        },
+        {
+          "command": "envdrop.generateExample",
+          "group": "2_keys@2"
+        },
+        {
+          "command": "envdrop.checkGitignore",
+          "group": "3_git@1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "envdrop.share",
+          "when": "resourceScheme == file && resourceFilename =~ /^(\\.env(\\.(?!example$|sample$|template$|backup$)[^/\\\\]+)?|.+\\.env)$/",
+          "group": "envdrop"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "envdrop.pull",
+          "when": "view == envdrop.home",
+          "group": "navigation@1"
+        },
+        {
+          "command": "envdrop.refresh",
+          "when": "view == envdrop.home",
+          "group": "navigation@2"
+        },
+        {
+          "command": "envdrop.revoke",
+          "when": "view == envdrop.home",
+          "group": "overflow@1"
+        },
+        {
+          "command": "envdrop.learnMore",
+          "when": "view == envdrop.home",
+          "group": "overflow@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "envdrop.refresh",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "EnvDrop",
+      "properties": {
+        "envdrop.serverUrl": {
+          "type": "string",
+          "default": "https://envdrop.example.workers.dev",
+          "markdownDescription": "EnvDrop server used when **sharing**. Must be `https://` (or `http://localhost` for development). Self-host: see the README.",
+          "scope": "machine-overridable",
+          "order": 0
+        },
+        "envdrop.defaultExpiry": {
+          "type": "string",
+          "enum": [
+            "10m",
+            "1h",
+            "24h"
+          ],
+          "enumDescriptions": [
+            "10 minutes",
+            "1 hour",
+            "24 hours"
+          ],
+          "default": "1h",
+          "description": "Default link expiry.",
+          "order": 1
+        },
+        "envdrop.defaultMaxViews": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Default number of times a link can be opened (1 = burn after read).",
+          "order": 2
+        },
+        "envdrop.checkGitignoreOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "When a workspace opens, warn once if env files in its root aren't covered by .gitignore.",
+          "order": 3
+        },
+        "envdrop.precommit.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn when an env file or a likely secret is staged for commit.",
+          "order": 4
+        },
+        "envdrop.precommit.scanContent": {
+          "type": "boolean",
+          "default": true,
+          "description": "Also scan the staged changes of every file for well-known secret formats (AWS, GitHub, Stripe, Slack, private keys, high-entropy KEY=... values). Matched values are never logged or shown.",
+          "order": 5
+        },
+        "envdrop.precommit.ignorePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "`.gitignore`-style patterns (relative to the repo root) that the staged-secret warning should skip, e.g. `test/fixtures/**`. You can also add `envdrop:allow` in a comment on a single line.",
+          "order": 6
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "envdrop",
+          "title": "EnvDrop",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "envdrop": [
+        {
+          "type": "webview",
+          "id": "envdrop.home",
+          "name": "Secure .env sharing",
+          "icon": "media/activity.svg",
+          "contextualTitle": "EnvDrop"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "envdrop.explorer",
+        "label": "EnvDrop",
+        "icon": "$(lock)"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json",
+    "package": "npm run build && vsce package --no-dependencies --out dist/envdrop.vsix",
+    "publish": "npm run build && vsce publish --no-dependencies"
+  },
+  "dependencies": {
+    "@envdrop/core": "0.1.0",
+    "@envdrop/shared": "0.1.0",
+    "ignore": "^7.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "~1.90.0",
+    "@vscode/codicons": "^0.0.46-24",
+    "@vscode/vsce": "^3.9.0",
+    "esbuild": "^0.28.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In untrusted workspaces EnvDrop never runs git (the .gitignore check uses a built-in parser) and the staged-secret warning is off."
+    },
+    "virtualWorkspaces": false
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chandanXcoder/EnvDrop"
+  },
+  "galleryBanner": {
+    "color": "#17132b",
+    "theme": "dark"
+  },
+  "icon": "media/icon.png",
+  "bugs": {
+    "url": "https://github.com/chandanXcoder/EnvDrop/issues"
+  },
+  "homepage": "https://github.com/chandanXcoder/EnvDrop#readme"
+}

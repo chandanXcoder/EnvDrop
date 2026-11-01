@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <meta
+      name="description"
+      content="Share .env files end-to-end encrypted with expiring, burn-after-read links, from inside VS Code."
+    />
+    <title>EnvDrop · stop pasting secrets into chat</title>
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+    <header class="nav">
+      <a class="brand" href="/"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b6cff" />
+              <stop offset="1" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+            fill="url(#lg)"
+          />
+          <circle cx="12" cy="13.4" r="2" fill="#fff" />
+          <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" /></svg
+        ><span>EnvDrop</span></a
+      >
+      <a
+        class="gh-btn"
+        href="https://github.com/chandanXcoder/EnvDrop"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+          /></svg
+        ><span>GitHub</span></a
+      >
+    </header>
+    <main class="shell wide">
+      <section class="landing-hero">
+        <div class="seal big" aria-hidden="true">
+          <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+          <svg class="seal-drop" viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="sd2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8b6cff" />
+                <stop offset="1" stop-color="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+              fill="url(#sd2)"
+            />
+            <g class="keyhole">
+              <circle cx="12" cy="13.4" r="2" fill="#fff" />
+              <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" />
+            </g>
+          </svg>
+        </div>
+        <h1 class="display">
+          Stop pasting <span class="strike">secrets</span> into chat.<br /><span class="grad"
+            >Drop them, encrypted.</span
+          >
+        </h1>
+        <p class="lead center">
+          EnvDrop shares <code>.env</code> files from VS Code with end-to-end encryption and links
+          that expire and burn after reading. It also stops you from committing them to git.
+        </p>
+        <div class="cta">
+          <a
+            class="btn primary big"
+            href="https://github.com/chandanXcoder/EnvDrop#development"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Get the VS Code extension</a
+          >
+          <a
+            class="btn ghost big"
+            href="https://github.com/chandanXcoder/EnvDrop"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+              <path
+                fill="currentColor"
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            Star on GitHub</a
+          >
+        </div>
+        <div class="terminal" aria-label="CLI example">
+          <div class="term-bar"><i></i><i></i><i></i><span>terminal</span></div>
+          <pre><span class="p">$</span> npx envdrop share .env --expiry 1h
+<span class="ok">✔</span> Encrypted 14 keys locally (AES-256-GCM)
+<span class="ok">✔</span> Link copied: <span class="link">https://…/s/3fK9xQ#••••••••</span>
+<span class="dim">  burns after 1 view · expires in 1h</span><span class="caret"></span></pre>
+        </div>
+      </section>
+
+      <section class="how">
+        <h2 class="center">How it works</h2>
+        <div class="flow">
+          <div class="step card">
+            <div class="bubble">1</div>
+            <h3>Encrypt locally</h3>
+            <p>
+              A random 256-bit key encrypts the file on your machine. Even the filename is
+              encrypted.
+            </p>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="step card">
+            <div class="bubble">2</div>
+            <h3>Share a link</h3>
+            <p>
+              The server stores only ciphertext. The key lives in the <code>#fragment</code>, which
+              is never sent to the server.
+            </p>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="step card">
+            <div class="bubble">3</div>
+            <h3>It self-destructs</h3>
+            <p>After N views or 10 min to 24 h, the blob is deleted. You can revoke any time.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="feature card">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="ic">
+            <path
+              fill="#F05032"
+              d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L8.708 2.627l2.76 2.76c.645-.215 1.379-.07 1.889.441.516.515.658 1.258.438 1.9l2.658 2.66c.645-.223 1.387-.078 1.9.435.721.72.721 1.884 0 2.604-.719.719-1.881.719-2.6 0-.539-.541-.674-1.337-.404-1.996L12.86 8.955v6.525c.176.086.342.203.488.348.713.721.713 1.883 0 2.6-.719.721-1.889.721-2.609 0-.719-.719-.719-1.879 0-2.598.182-.18.387-.316.605-.406V8.835c-.217-.091-.424-.222-.6-.401-.545-.545-.676-1.342-.396-2.009L7.636 3.7.45 10.881c-.6.605-.6 1.584 0 2.189l10.48 10.477c.604.604 1.582.604 2.186 0l10.43-10.43c.605-.603.605-1.582 0-2.187"
+            />
+          </svg>
+          <h3>.gitignore guard</h3>
+          <p>
+            Warns before you share a file that git could pick up, or one that's already tracked. One
+            click fixes it.
+          </p>
+        </div>
+        <div class="feature card">
+          <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="#22d3ee"
+              stroke-width="2"
+              stroke-linecap="round"
+              d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+            />
+          </svg>
+          <h3>Masked diff on pull</h3>
+          <p>
+            See which keys are added, changed or removed, with values hidden. Merge only what you
+            choose.
+          </p>
+        </div>
+        <div class="feature card">
+          <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="#8b6cff"
+              stroke-width="2"
+              stroke-linejoin="round"
+              d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"
+            />
+          </svg>
+          <h3>Pre-commit warning</h3>
+          <p>
+            Catches staged <code>.env</code> files and AWS, GitHub, Stripe and Slack tokens before
+            they leave your laptop.
+          </p>
+        </div>
+        <div class="feature card">
+          <svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+            <path
+              fill="currentColor"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+            />
+          </svg>
+          <h3>Open source</h3>
+          <p>
+            Small and auditable, with an honest threat model. Self-host with Docker or Cloudflare
+            Workers.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer class="foot">
+      <span
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <linearGradient id="lgf" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b6cff" />
+              <stop offset="1" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+            fill="url(#lgf)"
+          />
+          <circle cx="12" cy="13.4" r="2" fill="#fff" />
+          <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" />
+        </svg>
+        AES-256-GCM in your browser · keys never leave the <code>#fragment</code></span
+      >
+      <a href="https://github.com/chandanXcoder/EnvDrop" target="_blank" rel="noopener noreferrer"
+        ><svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+          />
+        </svg>
+        Open source on GitHub</a
+      >
+      <a
+        href="https://github.com/chandanXcoder/EnvDrop#threat-model"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Threat model</a
+      >
+    </footer>
+  </body>
+</html>

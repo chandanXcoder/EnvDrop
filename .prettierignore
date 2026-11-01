@@ -1,0 +1,6 @@
+node_modules
+dist
+*.vsix
+.wrangler
+package-lock.json
+server/src/web/generated

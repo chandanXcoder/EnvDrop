@@ -1,0 +1,45 @@
+{
+  "name": "envdrop",
+  "version": "0.1.0",
+  "description": "Share .env files end-to-end encrypted with expiring, burn-after-read links. CLI companion to the EnvDrop VS Code extension.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "envdrop": "dist/envdrop.mjs"
+  },
+  "files": [
+    "dist/envdrop.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "env",
+    "dotenv",
+    "secrets",
+    "share",
+    "encryption",
+    "cli",
+    "gitignore",
+    "pre-commit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chandanXcoder/EnvDrop.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/chandanXcoder/EnvDrop#cli",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@envdrop/core": "0.1.0",
+    "@envdrop/shared": "0.1.0",
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.28.0",
+    "ignore": "^7.0.5"
+  }
+}
