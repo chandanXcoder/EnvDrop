@@ -8,3 +8,4 @@ export * from './envParser';
 export * from './envDiff';
 export * from './secretPatterns';
 export * from './scanner';
+export * from './envExample';
