@@ -1,0 +1,46 @@
+{
+  "name": "envdrop",
+  "displayName": "EnvDrop",
+  "description": "Share .env files end-to-end encrypted with expiring, burn-after-read links. Warns before you leak secrets to git.",
+  "version": "0.1.0",
+  "publisher": "your-publisher",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "env",
+    "dotenv",
+    "secrets",
+    "share",
+    "encryption",
+    "gitignore"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [],
+  "contributes": {},
+  "scripts": {
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json",
+    "package": "npm run build && vsce package --no-dependencies --allow-missing-repository --out dist/envdrop.vsix",
+    "publish": "npm run build && vsce publish --no-dependencies"
+  },
+  "dependencies": {
+    "@envdrop/shared": "0.1.0",
+    "ignore": "^7.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "~1.90.0",
+    "@vscode/vsce": "^3.9.0",
+    "esbuild": "^0.28.0"
+  }
+}
