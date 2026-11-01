@@ -4,57 +4,265 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>EnvDrop: encrypted .env</title>
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/assets/style.css" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>EnvDrop · encrypted .env</title>
   </head>
   <body>
-    <main>
-      <h1>EnvDrop</h1>
-      <p class="sub">An end-to-end encrypted .env file was shared with you.</p>
+    <div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+    <header class="nav">
+      <a class="brand" href="/"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b6cff" />
+              <stop offset="1" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+            fill="url(#lg)"
+          />
+          <circle cx="12" cy="13.4" r="2" fill="#fff" />
+          <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" /></svg
+        ><span>EnvDrop</span></a
+      >
+      <a
+        class="gh-btn"
+        href="https://github.com/chandanXcoder/EnvDrop"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+          /></svg
+        ><span>GitHub</span></a
+      >
+    </header>
+    <main class="shell">
+      <section class="card hero-card" id="intro">
+        <div class="seal" id="seal" aria-hidden="true">
+          <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+          <svg class="seal-drop" viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="sd" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8b6cff" />
+                <stop offset="1" stop-color="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+              fill="url(#sd)"
+            />
+            <g class="keyhole">
+              <circle cx="12" cy="13.4" r="2" fill="#fff" />
+              <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" />
+            </g>
+          </svg>
+        </div>
+        <h1>Someone sent you an <span class="grad">encrypted .env</span></h1>
+        <p class="lead">
+          It decrypts <strong>right here in your browser</strong>. The key sits in the link's
+          <code>#fragment</code>, which browsers never send to the server.
+        </p>
 
-      <section id="intro">
-        <p>
-          Decryption happens <strong>in this browser</strong> using the key in the link's
-          <code>#fragment</code>, which is never sent to the server.
-        </p>
-        <p class="warn">
-          Opening it may use up the link (links are often burn-after-read). Make sure you're ready
-          to save the contents.
-        </p>
-        <button id="decrypt" type="button">Decrypt</button>
+        <ol class="steps" id="steps">
+          <li data-step="1"><span class="dot">1</span>Fetch ciphertext</li>
+          <li data-step="2"><span class="dot">2</span>Decrypt locally</li>
+          <li data-step="3"><span class="dot">3</span>Save your .env</li>
+        </ol>
+
+        <div class="notice">
+          <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 2c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"
+            />
+          </svg>
+          <span
+            >Links are usually <strong>burn-after-read</strong>. Opening it may use up the link, so
+            be ready to save the file.</span
+          >
+        </div>
+
+        <button id="decrypt" type="button" class="btn primary big">
+          <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M7 11V7a5 5 0 0 1 9.9-1M5 11h14v10H5z"
+            />
+          </svg>
+          Decrypt in this browser
+        </button>
         <p class="hint">
-          Using VS Code? Run <code>EnvDrop: Pull .env</code> instead. It shows a masked diff before
-          writing anything.
+          Using VS Code? Run <code>EnvDrop: Pull .env</code> instead. It shows a masked diff first
+          and doesn't depend on code from this server.
         </p>
       </section>
 
-      <section id="pass" hidden>
-        <label for="passphrase">This link is also protected by a passphrase:</label>
-        <input id="passphrase" type="password" autocomplete="off" spellcheck="false" />
-        <button id="unlock" type="button">Unlock</button>
-      </section>
-
-      <section id="result" hidden>
-        <p><span id="filename"></span> · <span id="views"></span></p>
-        <textarea id="content" readonly spellcheck="false" rows="14"></textarea>
-        <div class="row">
-          <button id="copy" type="button">Copy</button>
-          <button id="download" type="button">Download</button>
-          <button id="clear" type="button" class="secondary">Clear from page</button>
+      <section class="card" id="pass" hidden>
+        <h2>
+          <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15 7a4 4 0 1 1-3.9 5H3v4h3v-2h2v2h2.1A4 4 0 0 1 15 7z"
+            />
+          </svg>
+          This link is also locked with a passphrase
+        </h2>
+        <p class="lead">The sender should have given it to you separately.</p>
+        <div class="field">
+          <input
+            id="passphrase"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Passphrase"
+            aria-label="Passphrase"
+          />
+          <button id="unlock" type="button" class="btn primary">Unlock</button>
         </div>
       </section>
 
-      <p id="status" role="status" aria-live="polite"></p>
+      <section class="card" id="result" hidden>
+        <div class="result-head">
+          <div class="unlocked" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5 12.5l4.5 4.5L19 7.5"
+              />
+            </svg>
+          </div>
+          <div>
+            <h2 id="filename"></h2>
+            <p class="muted"><span id="keycount"></span> · <span id="views"></span></p>
+          </div>
+        </div>
 
-      <footer>
-        <p>
-          Trust note: this page's code is served by the same server that stores the encrypted data.
-          A compromised server could serve altered code. For the strongest guarantee, use the VS
-          Code extension or CLI.
+        <div class="toolbar">
+          <button id="toggleAll" type="button" class="btn ghost small">Show all values</button>
+          <button id="toggleRaw" type="button" class="btn ghost small">Raw file</button>
+        </div>
+        <div id="keys" class="keys" role="list"></div>
+        <textarea
+          id="content"
+          readonly
+          spellcheck="false"
+          rows="12"
+          hidden
+          aria-label="Decrypted file"
+        ></textarea>
+
+        <div class="actions">
+          <button id="download" type="button" class="btn primary">
+            <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"
+              />
+            </svg>
+            Download
+          </button>
+          <button id="copy" type="button" class="btn ghost">
+            <svg viewBox="0 0 24 24" class="ic" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+                d="M9 9h11v11H9zM5 15H4V4h11v1"
+              />
+            </svg>
+            Copy
+          </button>
+          <button id="clear" type="button" class="btn danger">Wipe from page</button>
+        </div>
+        <p class="hint">
+          Save it as your <code>.env</code> and make sure it's in <code>.gitignore</code>.
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="ic">
+            <path
+              fill="#F05032"
+              d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L8.708 2.627l2.76 2.76c.645-.215 1.379-.07 1.889.441.516.515.658 1.258.438 1.9l2.658 2.66c.645-.223 1.387-.078 1.9.435.721.72.721 1.884 0 2.604-.719.719-1.881.719-2.6 0-.539-.541-.674-1.337-.404-1.996L12.86 8.955v6.525c.176.086.342.203.488.348.713.721.713 1.883 0 2.6-.719.721-1.889.721-2.609 0-.719-.719-.719-1.879 0-2.598.182-.18.387-.316.605-.406V8.835c-.217-.091-.424-.222-.6-.401-.545-.545-.676-1.342-.396-2.009L7.636 3.7.45 10.881c-.6.605-.6 1.584 0 2.189l10.48 10.477c.604.604 1.582.604 2.186 0l10.43-10.43c.605-.603.605-1.582 0-2.187"
+            />
+          </svg>
         </p>
-      </footer>
+      </section>
+
+      <section class="card state-card" id="gone" hidden>
+        <div class="flame" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M12 2c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"
+            />
+          </svg>
+        </div>
+        <h2 id="goneTitle">This link has burned</h2>
+        <p class="lead" id="goneText">
+          It expired, was revoked, or was already opened. Ask the sender for a new one.
+        </p>
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
     </main>
+    <footer class="foot">
+      <span
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <linearGradient id="lgf" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b6cff" />
+              <stop offset="1" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 1.8C11.6 2.3 4.6 10 4.6 14.7a7.4 7.4 0 0 0 14.8 0C19.4 10 12.4 2.3 12 1.8z"
+            fill="url(#lgf)"
+          />
+          <circle cx="12" cy="13.4" r="2" fill="#fff" />
+          <path d="M11 14.6h2l.7 3.6h-3.4z" fill="#fff" />
+        </svg>
+        AES-256-GCM in your browser · keys never leave the <code>#fragment</code></span
+      >
+      <a href="https://github.com/chandanXcoder/EnvDrop" target="_blank" rel="noopener noreferrer"
+        ><svg viewBox="0 0 16 16" aria-hidden="true" class="ic">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+          />
+        </svg>
+        Open source on GitHub</a
+      >
+      <a
+        href="https://github.com/chandanXcoder/EnvDrop#threat-model"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Threat model</a
+      >
+    </footer>
     <script type="module" src="/assets/client.js"></script>
   </body>
 </html>

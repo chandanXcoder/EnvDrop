@@ -18,9 +18,13 @@ import type { RateBucket, RateLimiter } from './rateLimit';
 import type { SecretStore } from './store';
 
 export interface WebAssets {
+  /** /s/:id decrypt page */
   html: string;
+  /** / landing page */
+  landing?: string;
   js: string;
   css: string;
+  logo?: string;
 }
 
 export interface AppDeps {
@@ -178,29 +182,21 @@ export function createApp(deps: AppDeps): Handler {
     }
 
     if (deps.assets && method === 'GET') {
-      if (/^\/s\/[A-Za-z0-9_-]{22}\/?$/.test(path) || path === '/') {
+      const a = deps.assets;
+      const asset = (body: string, type: string, csp?: string) => ({
+        res: new Response(body, { headers: { 'Content-Type': type } }),
+        csp,
+      });
+      if (/^\/s\/[A-Za-z0-9_-]{22}\/?$/.test(path)) {
         // Static page; it never fetches the blob until the user clicks "Decrypt",
         // so chat link previews cannot burn a view.
-        return {
-          res: new Response(deps.assets.html, {
-            headers: { 'Content-Type': 'text/html; charset=utf-8' },
-          }),
-          csp: PAGE_CSP,
-        };
+        return asset(a.html, 'text/html; charset=utf-8', PAGE_CSP);
       }
-      if (path === '/assets/client.js') {
-        return {
-          res: new Response(deps.assets.js, {
-            headers: { 'Content-Type': 'text/javascript; charset=utf-8' },
-          }),
-        };
-      }
-      if (path === '/assets/style.css') {
-        return {
-          res: new Response(deps.assets.css, {
-            headers: { 'Content-Type': 'text/css; charset=utf-8' },
-          }),
-        };
+      if (path === '/' && a.landing) return asset(a.landing, 'text/html; charset=utf-8', PAGE_CSP);
+      if (path === '/assets/client.js') return asset(a.js, 'text/javascript; charset=utf-8');
+      if (path === '/assets/style.css') return asset(a.css, 'text/css; charset=utf-8');
+      if ((path === '/assets/logo.svg' || path === '/favicon.ico') && a.logo) {
+        return asset(a.logo, 'image/svg+xml');
       }
     }
     return { res: apiError(404, 'Not found') };

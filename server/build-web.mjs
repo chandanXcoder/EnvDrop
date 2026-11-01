@@ -20,6 +20,8 @@ const result = await build({
 
 const assets = {
   html: readFileSync(join(web, 'page.html'), 'utf8'),
+  landing: readFileSync(join(web, 'landing.html'), 'utf8'),
+  logo: readFileSync(join(web, 'logo.svg'), 'utf8'),
   css: readFileSync(join(web, 'style.css'), 'utf8'),
   js: result.outputFiles[0].text,
 };

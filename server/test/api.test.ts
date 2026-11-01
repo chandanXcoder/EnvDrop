@@ -168,11 +168,22 @@ describe('cross-cutting', () => {
     const withWeb = createApp({
       store,
       rateLimiter: new MemoryRateLimiter(),
-      assets: { html: '<html></html>', js: '', css: '' },
+      assets: {
+        html: '<html>decrypt</html>',
+        landing: '<html>landing</html>',
+        js: '',
+        css: '',
+        logo: '<svg/>',
+      },
     });
     const page = await withWeb(new Request(`${BASE}/s/${id}`));
     expect(page.status).toBe(200);
     expect(page.headers.get('Content-Security-Policy')).toContain("script-src 'self'");
     expect(store.has(id)).toBe(true); // preview bots fetching /s/:id don't burn views
+    expect(await (await withWeb(new Request(`${BASE}/`))).text()).toContain('landing');
+    expect(await page.text()).toContain('decrypt');
+    const logo = await withWeb(new Request(`${BASE}/assets/logo.svg`));
+    expect(logo.headers.get('Content-Type')).toBe('image/svg+xml');
+    expect((await withWeb(new Request(`${BASE}/s/not-an-id`))).status).toBe(404);
   });
 });
